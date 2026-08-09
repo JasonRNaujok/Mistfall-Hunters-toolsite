@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mistfall Hunter – Camp Tools</title>
+<style>
+  :root {
+    --bg:#0c0d11; --card:#16181f; --accent:#7c5cff; --done:#2ecc71;
+    --text:#e8e8ec; --muted:#9a9aab; --tba:#e67e22;
+  }
+  * { box-sizing:border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; background:var(--bg); color:var(--text); margin:0; padding:16px; line-height:1.45; }
+  h1 { font-size:1.4rem; margin:0 0 6px; }
+  .subtitle { color:var(--muted); font-size:0.86rem; margin-bottom:12px; }
+
+  /* Tabs */
+  .tabs { display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
+  .tab-btn {
+    background:#2a2d3a; border:none; color:var(--muted); padding:8px 16px;
+    border-radius:8px; cursor:pointer; font-size:0.9rem; font-weight:500;
+  }
+  .tab-btn:hover { background:#3a3d4a; color:var(--text); }
+  .tab-btn.active { background:var(--accent); color:#fff; }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  .totals { background:var(--card); border-radius:12px; padding:14px; margin-bottom:20px; position:sticky; top:8px; z-index:10; max-height:38vh; overflow:auto; }
+  .totals h2 { font-size:0.98rem; margin:0 0 10px; }
+  .item-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:5px 10px; font-size:0.82rem; }
+  .item { display:flex; justify-content:space-between; align-items:center; padding:4px 8px; border-radius:6px; }
+  .building { background:var(--card); border-radius:12px; margin-bottom:14px; overflow:hidden; }
+  .building-header { padding:11px 14px; display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; }
+  .building-header h3 { margin:0; flex:1; font-size:1.02rem; }
+  .badge { background:#2a2d3a; color:var(--muted); font-size:0.72rem; padding:2px 8px; border-radius:999px; }
+  .badge.done { background:var(--done); color:#000; }
+  .levels { padding:0 14px 12px; }
+  .level { display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-top:1px solid #2a2d3a; cursor:pointer; }
+  .level input { margin-top:3px; accent-color:var(--accent); width:17px; height:17px; flex-shrink:0; }
+  .level-info { flex:1; min-width:0; }
+  .level-title { font-weight:600; font-size:0.93rem; }
+  .level-bonus { color:var(--muted); font-size:0.78rem; }
+  .mats { font-size:0.8rem; margin-top:4px; display:flex; flex-wrap:wrap; gap:4px; }
+  .mat-chip { display:inline-block; padding:2px 7px; border-radius:5px; font-size:0.78rem; font-weight:500; }
+  .level.completed .level-title { text-decoration:line-through; opacity:0.55; }
+  .level.completed .mat-chip { opacity:0.55; text-decoration:line-through; }
+  .reset { margin-top:16px; background:#2a2d3a; border:none; color:var(--text); padding:8px 16px; border-radius:8px; cursor:pointer; }
+  .reset:hover { background:#3a3d4a; }
+  .note { font-size:0.78rem; color:var(--muted); margin-top:12px; }
+
+  /* Rarity colors */
+  .r-common     { background:#3a3a3a; color:#e0e0e0; }
+  .r-excellent  { background:#1e3a5f; color:#6cb2ff; }
+  .r-rare       { background:#1a3c2e; color:#5ddea0; }
+  .r-epic       { background:#3a1f5c; color:#c084fc; }
+  .r-legendary  { background:#4a2f0f; color:#fbbf24; }
+  .r-holy       { background:#4a1212; color:#f87171; }
+  .r-currency   { background:#2a2d3a; color:#a5b4fc; }
+  .r-tba        { background:#3d2a12; color:#A9A9A9; }
+
+  /* Cipher styles */
+  .cipher-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:14px; }
+  .cipher-card { background:var(--card); border-radius:12px; padding:14px 16px; }
+  .cipher-card h3 { margin:0 0 2px; font-size:1.05rem; }
+  .cipher-role { color:var(--muted); font-size:0.82rem; margin-bottom:10px; }
+  .cipher-words { display:flex; flex-wrap:wrap; gap:5px; }
+  .cipher-word {
+    background:#2a2d3a; color:var(--text); padding:3px 9px; border-radius:6px;
+    font-size:0.82rem; font-weight:500;
+  }
+  .cipher-search {
+    width:100%; max-width:360px; padding:9px 12px; border-radius:8px;
+    border:1px solid #2a2d3a; background:#1a1c24; color:var(--text);
+    font-size:0.9rem; margin-bottom:16px;
+  }
+  .cipher-search:focus { outline:none; border-color:var(--accent); }
+  .cipher-hint { color:var(--muted); font-size:0.8rem; margin-bottom:14px; }
+</style>
+</head>
+<body>
+<h1>Mistfall Hunter – Camp Tools</h1>
+<p class="subtitle">Camp upgrades checklist + Cipher turn-in locations</p>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="upgrades">Camp Upgrades</button>
+  <button class="tab-btn" data-tab="ciphers">Cipher Turn-ins</button>
+</div>
+
+<!-- ========== TAB 1: Camp Upgrades ========== -->
+<div id="tab-upgrades" class="tab-panel active">
+  <div class="totals" id="totals">
+    <h2>Items still needed</h2>
+    <div class="item-grid" id="item-list"></div>
+  </div>
+
+  <div id="buildings"></div>
+
+  <button class="reset" onclick="resetAll()">Reset all progress</button>
+  <p class="note">Rarity colors: Common (gray) · Excellent (blue) · Rare (green) · Epic (purple) · Legendary (gold) · Holy (red). Checking a level auto-completes all previous levels of that building.</p>
+</div>
+
+<!-- ========== TAB 2: Cipher Turn-ins ========== -->
+<div id="tab-ciphers" class="tab-panel">
+  <p class="cipher-hint">Type a cipher word to instantly see which NPC accepts it. Or browse by NPC below.</p>
+  <input type="text" class="cipher-search" id="cipherSearch" placeholder="Search cipher word (e.g. Mantra, Anvil, Homeward…)" autocomplete="off">
+
+  <div class="cipher-grid" id="cipherGrid"></div>
+</div>
+
+<script>
+// ========== Tabs ==========
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ========== Cipher Data ==========
+const CIPHERS = [
+  {
+    npc: "Pip",
+    role: "Auction House",
+    words: ["Mantra", "Score", "Plucking", "Tree Hollow", "Secret Cache", "Elder Edict"]
+  },
+  {
+    npc: "Dew",
+    role: "Maiden",
+    words: ["Homeward", "Achor", "Prophecy", "Spindle", "Echo"]
+  },
+  {
+    npc: "Soekja",
+    role: "The Bird",
+    words: ["Stone Steps", "Tides", "Signpost", "Supplies", "Guidance", "Return", "Wings", "Praise"]
+  },
+  {
+    npc: "Sigrid",
+    role: "Tavern Wife",
+    words: ["Sealing Wax", "Residual Heat", "Acid", "Malt", "Cloves"]
+  },
+  {
+    npc: "Cazarro",
+    role: "Merchant",
+    words: ["City State", "Intelligence", "Insight", "Balance", "Blood", "Barter", "Haggling", "Covenant", "Interest"]
+  },
+  {
+    npc: "Dramm",
+    role: "Blacksmith",
+    words: ["Fire", "Brimstone", "Ashes", "Anvil", "Furnace", "Smoke"]
+  },
+  {
+    npc: "Merimo",
+    role: "Pip's Giant Goat",
+    words: ["Hay", "Cheese", "Rugs", "Caravan", "Camel Bells", "Salt Licks"]
+  }
+];
+
+function renderCiphers(filter = "") {
+  const grid = document.getElementById("cipherGrid");
+  const q = filter.trim().toLowerCase();
+  grid.innerHTML = "";
+
+  CIPHERS.forEach(entry => {
+    const matchedWords = q
+      ? entry.words.filter(w => w.toLowerCase().includes(q))
+      : entry.words;
+
+    // Show card if no filter, or if NPC/role/word matches
+    const show = !q ||
+      entry.npc.toLowerCase().includes(q) ||
+      entry.role.toLowerCase().includes(q) ||
+      matchedWords.length > 0;
+
+    if (!show) return;
+
+    const card = document.createElement("div");
+    card.className = "cipher-card";
+    card.innerHTML = `
+      <h3>${entry.npc}</h3>
+      <div class="cipher-role">${entry.role}</div>
+      <div class="cipher-words">
+        ${(q ? matchedWords : entry.words).map(w =>
+          `<span class="cipher-word">${w}</span>`
+        ).join("")}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  if (grid.children.length === 0) {
+    grid.innerHTML = `<div style="color:var(--muted)">No matching cipher words found.</div>`;
+  }
+}
+
+document.getElementById("cipherSearch").addEventListener("input", (e) => {
+  renderCiphers(e.target.value);
+});
+renderCiphers();
+
+// ========== Rarity + Camp Data (same as your updated file) ==========
+const RARITY = {
+  "Charcoal":"common","Tarred Rope":"common","Pottery Shard":"common","Mutant Mycelium":"common",
+  "Fishbone":"common","Vine Bundle":"common","Heavy Stone Block":"common","Lynx Whiskers":"common",
+  "Herb Bundle":"common",
+
+  "Needle Case":"rare","Ornate Wooden Box":"rare","Fine Salt":"rare","Copper Button":"rare",
+  "Slime":"rare","Exotic Seed":"rare","Velgr Feather":"rare","Veteran Medal":"rare",
+  "Lazurite":"rare","Glintstone":"rare","Spiritwood Pin":"rare",
+
+  "Fortune Bean":"excellent","Silver Bowl":"excellent","Incense Burner":"excellent",
+  "Soulcall Flute":"excellent","Mixed Spices":"excellent","Blood Moss":"excellent",
+  "Crimson Bat Eye":"excellent","Pearl Dust":"excellent","Spirit Antler":"excellent",
+  "Thunder Ore":"excellent","Bone Lyre":"excellent","Mythic Panel":"excellent",
+
+  "Bloodstained Brooch":"epic","Ritual Severed Dagger":"epic","Gem Mirror":"epic",
+  "Mithril Lamp":"epic","Norgard King's Coin":"epic","Dragonslayer's Banner":"epic",
+  "Slumbering Dragon Statue":"epic","Ornamental Orb":"epic","Soulcomb Net":"epic",
+  "Dragonflame Bone":"epic","Obsidian Ore":"epic","Pathfinder Lantern":"epic",
+  "Hallowgrove Codex":"epic",
+
+  "Blessing Sachet":"legendary","Velvar's Teachings":"legendary","Gilded Ring":"legendary",
+  "Holy Sith Astrolabe":"legendary","Obsidian Raven":"legendary","Gold Ship Sculpture":"legendary",
+  "Fire Salamander Fossil":"legendary","Spellbound Doll":"legendary","Soul Jar":"legendary",
+  "Frostbee Crystal Hive":"legendary","Penitent's Tear":"legendary","Celestigold":"legendary",
+  "Hastain's Tear":"legendary","Messenger Bug Jar":"legendary","Sage's Golden Mask":"legendary",
+  "Dragonblood Essence":"legendary","Blazing Sun Chariot":"legendary",
+
+  "Wolfrunner's Armband":"holy","Retribution Spearhead":"holy","Lost Pontiff's Crown":"holy",
+  "Kjernno's Idol":"holy","Gem of the Gods":"holy","Immaculate Egg":"holy","Abyssal Dragon Egg":"holy",
+  "Faded Divine Tree Heart":"holy","Vronn's Forging Hammer":"holy","Golden Anchor Chain":"Holy",
+
+  "Gyldenblod":"currency"
+};
+
+function rarityClass(name) {
+  return "r-" + (RARITY[name] || "tba");
+}
+
+const DATA = {
+  "Gyldenblod Pool (9 levels)": {
+    levels: [
+      { lvl:2, bonus:"Gyldjar +0 → +50%", mats:{ "Incense Burner":2, "Velgr Feather":2, "Lynx Whiskers":3, "Tarred Rope":3 } },
+      { lvl:3, bonus:"Gyldjar +50 → +100%  |  Character slots +1", mats:{ "Dragonslayer's Banner":1, "Spirit Antler":2, "Veteran Medal":2, "Heavy Stone Block":1 } },
+      { lvl:4, bonus:"Gyldjar +100 → +150%  |  Character slots +2  |  Spirit Infusion", mats:{ "Penitent's Tear":1, "Slumbering Dragon Statue":1, "Pearl Dust":1, "Lazurite":2 } },
+      { lvl:5, bonus:"Gyldjar +150 → +200%  |  Character slots +3", mats:{ "Velvar's Teachings":1, "Obsidian Raven":1, "Holy Sith Astrolabe":1, "Soulcomb Net":2 } },
+      { lvl:6, bonus:"Gyldjar +200 → +300%  |  Character slots +4", mats:{ "Abyssal Dragon Egg":1, "Messenger Bug Jar":1, "Ritual Severed Dagger":2 } },
+      { lvl:7, bonus:"Gyldjar +300 → +400%  |  Character slots +5  (Fate: Warning)", mats:{}, tba:true },
+      { lvl:8, bonus:"Gyldjar +400 → +500%  |  Character slots +6  (Fate: Warning)", mats:{ "Gyldenblod":1500, "Retribution Spearhead":1, "Lost Pontiff's Crown":1, "Wolfrunner's Armband":1, "Fire Salamander Fossil":2 } },
+      { lvl:9, bonus:"Gyldjar +500 → +700%  |  Character slots +7  |  cheaper Spirit Infusion", mats:{}, tba:true }
+    ]
+  },
+  "Warehouse (13 levels)": {
+    levels: [
+      { lvl:2, bonus:"Capacity +0 → +24", mats:{ "Pearl Dust":1, "Copper Button":2, "Fine Salt":2, "Fishbone":2 } },
+      { lvl:3, bonus:"Capacity +24 → +48", mats:{ "Dragonslayer's Banner":1, "Norgard King's Coin":1, "Fortune Bean":2, "Spiritwood Pin":2 } },
+      { lvl:4, bonus:"Capacity +48 → +72", mats:{ "Soul Jar":1, "Ornamental Orb":1, "Slumbering Dragon Statue":1, "Silver Bowl":2 } },
+      { lvl:5, bonus:"Capacity +72 → +104", mats:{ "Hastain's Tear":1, "Frostbee Crystal Hive":1, "Gem Mirror":2, "Hallowgrove Codex":2 } },
+      { lvl:6, bonus:"Capacity +104 → +136", mats:{ "Kjernno's Idol":1, "Velvar's Teachings":1, "Blessing Sachet":2 } },
+      { lvl:7, bonus:"Capacity +136 → +168", mats:{}, tba:true },
+      { lvl:8, bonus:"Capacity +168 → +208", mats:{}, tba:true },
+      { lvl:9, bonus:"Capacity +208 → +248", mats:{}, tba:true },
+      { lvl:10, bonus:"Capacity +248 → +288", mats:{}, tba:true },
+      { lvl:11, bonus:"Capacity +288 → +336", mats:{}, tba:true },
+      { lvl:12, bonus:"Capacity +336 → +392", mats:{}, tba:true },
+      { lvl:13, bonus:"Capacity +392 → +448", mats:{}, tba:true }
+    ]
+  },
+  "Goddess Statue (8 levels)": {
+    levels: [
+      { lvl:2, bonus:"Springhorn Healing +0% → +10%", mats:{ "Pearl Dust":1, "Velgr Feather":1, "Heavy Stone Block":2, "Vine Bundle":1 } },
+      { lvl:3, bonus:"+10% → +20%", mats:{ "Gem Mirror":1, "Spirit Antler":2, "Exotic Seed":3, "Mutant Mycelium":2 } },
+      { lvl:4, bonus:"+20% → +30%", mats:{ "Holy Sith Astrolabe":1, "Norgard King's Coin":1, "Crimson Bat Eye":1, "Lazurite":2 } },
+      { lvl:5, bonus:"+30% → +40%", mats:{ "Frostbee Crystal Hive":1, "Soul Jar":1, "Spellbound Doll":1, "Obsidian Ore":2 } },
+      { lvl:6, bonus:"+40% → +50%", mats:{"Kjernno's Idol": 1, "Celestigold": 1, "Dragonflame Bone": 2, "Pathfinder Lantern": 1} },
+      { lvl:7, bonus:"+50% → +55%  (Fate: Warning)", mats:{ "Gyldenblod":1000, "Retribution Spearhead":1, "Lost Pontiff's Crown":1, "Gold Ship Sculpture":1, "Slumbering Dragon Statue":2 } },
+      { lvl:8, bonus:"+55% → +60%  (Fate: Warning)", mats:{}, tba:true }
+    ]
+  },
+  "Workshop (8 levels)": {
+    levels: [
+      { lvl:2, bonus:"Excellent weapons/accessories + faster Excellent & T1 Gems", mats:{ "Soulcall Flute":1, "Copper Button":2, "Charcoal":2 } },
+      { lvl:3, bonus:"Epic armor + queue expand", mats:{ "Mithril Lamp":1, "Mixed Spices":1, "Slime":1, "Mutant Mycelium":2 } },
+      { lvl:4, bonus:"Epic weapons/accessories + faster Epic", mats:{ "Blessing Sachet":1, "Gem Mirror":1, "Blood Moss":1 } },
+      { lvl:5, bonus:"Tier 2 Gems", mats:{ "Gilded Ring":1, "Hastain's Tear":1, "Ritual Severed Dagger":1, "Mythic Panel":2 } },
+      { lvl:6, bonus:"Legendary armor + faster T2 Gems", mats:{"Wolfrunner's Armband":1, "Blessing Sachet":1, "Ornamental Orb":1} },
+      { lvl:7, bonus:"Legendary weapons/accessories", mats:{}, tba:true },
+      { lvl:8, bonus:"Holy weapons", mats:{}, tba:true }
+    ]
+  },
+  "Shop (6 levels)": {
+    levels: [
+      { lvl:2, bonus:"Premium Shop", mats:{ "Velgr Feather":1, "Slime":1, "Vine Bundle":2, "Fishbone":2 } },
+      { lvl:3, bonus:"More Premium stock", mats:{ "Gem Mirror":1, "Pearl Dust":2, "Needle Case":2, "Herb Bundle":2 } },
+      { lvl:4, bonus:"New Tactical items", mats:{ "Bloodstained Brooch":2, "Thunder Ore":2, "Fine Salt":2, "Ornate Wooden Box":2 } },
+      { lvl:5, bonus:"Chance of Excellent stock", mats:{ "Velvar's Teachings":1, "Dragonslayer's Banner":1, "Mithril Lamp":1, "Soulcall Flute":2 } },
+      { lvl:6, bonus:"Further stock", mats:{}, tba:true }
+    ]
+  },
+  "Auction House (6 levels)": {
+    levels: [
+      { lvl:2, bonus:"+1 Auction slot", mats:{ "Gem Mirror":1, "Mixed Spices":2, "Soulcall Flute":2, "Glintstone":2 } },
+      { lvl:3, bonus:"+4 total slots", mats:{ "Norgard King's Coin":2, "Mithril Lamp":2, "Bone Lyre":2, "Blood Moss":2 } },
+      { lvl:4, bonus:"+6 total slots", mats:{ "Spellbound Doll":1, "Blessing Sachet":1, "Dragonslayer's Banner":1, "Thunder Ore":1 } },
+      { lvl:5, bonus:"+9 total slots", mats:{ "Golden Anchor Chain":1, "Ornamental Orb":1, "Dragonflame Bone":2, "Fortune Bean":2 } },
+      { lvl:6, bonus:"+12 total slots", mats:{ "Dragonblood Essence":1, "Messenger Bug Jar":1, "Hallowgrove Codex":2, "Incense Burner":2 } }
+    ]
+  },
+  "Tavern (4 levels)": {
+    levels: [
+      { lvl:2, bonus:"Hero’s Ale", mats:{ "Norgard King's Coin":2, "Ritual Severed Dagger":2, "Crimson Bat Eye":2, "Bone Lyre":1 } },
+      { lvl:3, bonus:"Warblood", mats:{ "Gold Ship Sculpture":1, "Dragonslayer's Banner":1, "Incense Burner":2, "Veteran Medal":2 } },
+      { lvl:4, bonus:"Gods’ Brew", mats:{ "Blazing Sun Chariot":1, "Ornamental Orb":2, "Mythic Panel":2, "Silver Bowl":2 } }
+    ]
+  },
+  "Scavenger Squad (8 levels)": {
+    levels: [
+      { lvl:2, bonus:"New strategies – Normal Zone", mats:{ "Bone Lyre":1, "Needle Case":1, "Charcoal":2 } },
+      { lvl:3, bonus:"Anomaly Zone", mats:{ "Dragonflame Bone":1, "Fortune Bean":2, "Slime":2, "Ornate Wooden Box":2 } },
+      { lvl:4, bonus:"New strategies – Anomaly", mats:{ "Soul Jar":1, "Hallowgrove Codex":1, "Silver Bowl":1, "Glintstone":2 } },
+      { lvl:5, bonus:"Danger Zone", mats:{ "Obsidian Raven":1, "Hastain's Tear":1, "Pathfinder Lantern":2 } },
+      { lvl:6, bonus:"New strategies – Danger", mats:{ "Sage's Golden Mask":1, "Holy Sith Astrolabe":1, "Bloodstained Brooch":2 } },
+      { lvl:7, bonus:"Cataclysm Zone", mats:{}, tba:true },
+      { lvl:8, bonus:"Final strategies", mats:{}, tba:true }
+    ]
+  },
+  "Soulcatch Tree (8 levels)": {
+    levels: [
+      { lvl:2, bonus:"Net slots +2  |  Queue +1", mats:{ "Blood Moss":1, "Spiritwood Pin":1, "Pottery Shard":3 } },
+      { lvl:3, bonus:"Net +4  |  Queue +2", mats:{ "Bloodstained Brooch":1, "Crimson Bat Eye":1, "Needle Case":2, "Herb Bundle":2 } },
+      { lvl:4, bonus:"Net +6  |  Queue +3", mats:{ "Obsidian Ore":2, "Mithril Lamp":1, "Thunder Ore":1 } },
+      { lvl:5, bonus:"Further slots", mats:{}, tba:true },
+      { lvl:6, bonus:"Further slots", mats:{}, tba:true },
+      { lvl:7, bonus:"Further slots", mats:{}, tba:true },
+      { lvl:8, bonus:"Max (Net ~20 / Queue ~10)", mats:{}, tba:true }
+    ]
+  }
+};
+
+const STORAGE_KEY = "mistfall_camp_color_cascade_v1";
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function getNeeded() {
+  const needed = {};
+  for (const [bName, b] of Object.entries(DATA)) {
+    for (const lv of b.levels) {
+      const key = `${bName}|${lv.lvl}`;
+      if (state[key]) continue;
+      for (const [item, qty] of Object.entries(lv.mats || {})) {
+        needed[item] = (needed[item] || 0) + qty;
+      }
+    }
+  }
+  return needed;
+}
+
+function renderTotals() {
+  const needed = getNeeded();
+  const el = document.getElementById("item-list");
+  const entries = Object.entries(needed).sort((a,b) => a[0].localeCompare(b[0]));
+  if (entries.length === 0) {
+    el.innerHTML = "<div style='color:var(--done)'>All tracked upgrades complete!</div>";
+    return;
+  }
+  el.innerHTML = entries.map(([item, qty]) =>
+    `<div class="item ${rarityClass(item)}"><span>${item}</span><strong>×${qty}</strong></div>`
+  ).join("");
+}
+
+function render() {
+  const container = document.getElementById("buildings");
+  container.innerHTML = "";
+  for (const [bName, b] of Object.entries(DATA)) {
+    const allDone = b.levels.every(lv => state[`${bName}|${lv.lvl}`] || lv.tba);
+    const div = document.createElement("div");
+    div.className = "building";
+    div.innerHTML = `
+      <div class="building-header">
+        <h3>${bName}</h3>
+        <span class="badge ${allDone ? "done" : ""}">${allDone ? "Done / TBA only" : b.levels.length + " levels"}</span>
+      </div>
+      <div class="levels"></div>
+    `;
+    const levelsEl = div.querySelector(".levels");
+    b.levels.forEach(lv => {
+      const key = `${bName}|${lv.lvl}`;
+      const done = !!state[key];
+      const row = document.createElement("div");
+      row.className = "level" + (done ? " completed" : "");
+
+      let matsHtml = "";
+      if (lv.tba || Object.keys(lv.mats || {}).length === 0) {
+        matsHtml = `<span class="mat-chip r-tba">Materials TBA — check in-game</span>`;
+      } else {
+        matsHtml = Object.entries(lv.mats).map(([name, qty]) =>
+          `<span class="mat-chip ${rarityClass(name)}">${qty}× ${name}</span>`
+        ).join("");
+      }
+
+      row.innerHTML = `
+        <input type="checkbox" ${done ? "checked" : ""}>
+        <div class="level-info">
+          <div class="level-title">Level ${lv.lvl}</div>
+          <div class="level-bonus">${lv.bonus || ""}</div>
+          <div class="mats">${matsHtml}</div>
+        </div>
+      `;
+
+      const toggle = (forceOn = null) => {
+        const newVal = forceOn !== null ? forceOn : !state[key];
+        if (newVal) {
+          b.levels.forEach(prev => {
+            if (prev.lvl <= lv.lvl) {
+              state[`${bName}|${prev.lvl}`] = true;
+            }
+          });
+        } else {
+          state[key] = false;
+        }
+        save();
+        render();
+      };
+
+      row.querySelector("input").addEventListener("change", (e) => toggle(e.target.checked));
+      row.addEventListener("click", (e) => {
+        if (e.target.tagName !== "INPUT") toggle();
+      });
+      levelsEl.appendChild(row);
+    });
+    container.appendChild(div);
+  }
+  renderTotals();
+}
+
+function resetAll() {
+  if (confirm("Reset all progress?")) {
+    state = {};
+    save();
+    render();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
