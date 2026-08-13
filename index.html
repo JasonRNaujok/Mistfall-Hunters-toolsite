@@ -79,7 +79,7 @@
 </head>
 <body>
 <h1>Mistfall Hunter – Camp Tools</h1>
-<p class="subtitle">Camp upgrades checklist + Cipher turn-in locations</p>
+<p class="subtitle">Full camp upgrade checklist + Cipher turn-in locations · All levels &amp; Gyldenblod costs included</p>
 
 <div class="tabs">
   <button class="tab-btn active" data-tab="upgrades">Camp Upgrades</button>
@@ -96,7 +96,7 @@
   <div id="buildings"></div>
 
   <button class="reset" onclick="resetAll()">Reset all progress</button>
-  <p class="note">Rarity colors: Common (gray) · Excellent (blue) · Rare (green) · Epic (purple) · Legendary (gold) · Holy (red). Checking a level auto-completes all previous levels of that building.</p>
+  <p class="note">Rarity colors: Common (gray) · Excellent (blue) · Rare (green) · Epic (purple) · Legendary (gold) · Holy (red) · Gyldenblod (indigo). Checking a level auto-completes all previous levels of that building. Data sourced from in-game Camp menu.</p>
 </div>
 
 <!-- ========== TAB 2: Cipher Turn-ins ========== -->
@@ -148,7 +148,7 @@ const CIPHERS = [
   {
     npc: "Dramm",
     role: "Blacksmith",
-    words: ["Fire", "Brimstone", "Ashes", "Anvil", "Furnace", "Smoke","Mineral Vein", "Oathbound"]
+    words: ["Fire", "Brimstone", "Ashes", "Anvil", "Furnace", "Smoke", "Mineral Vein", "Oathbound"]
   },
   {
     npc: "Merimo",
@@ -167,7 +167,6 @@ function renderCiphers(filter = "") {
       ? entry.words.filter(w => w.toLowerCase().includes(q))
       : entry.words;
 
-    // Show card if no filter, or if NPC/role/word matches
     const show = !q ||
       entry.npc.toLowerCase().includes(q) ||
       entry.role.toLowerCase().includes(q) ||
@@ -199,7 +198,7 @@ document.getElementById("cipherSearch").addEventListener("input", (e) => {
 });
 renderCiphers();
 
-// ========== Rarity + Camp Data (same as your updated file) ==========
+// ========== Rarity ==========
 const RARITY = {
   "Charcoal":"common","Tarred Rope":"common","Pottery Shard":"common","Mutant Mycelium":"common",
   "Fishbone":"common","Vine Bundle":"common","Heavy Stone Block":"common","Lynx Whiskers":"common",
@@ -225,11 +224,12 @@ const RARITY = {
   "Fire Salamander Fossil":"legendary","Spellbound Doll":"legendary","Soul Jar":"legendary",
   "Frostbee Crystal Hive":"legendary","Penitent's Tear":"legendary","Celestigold":"legendary",
   "Hastain's Tear":"legendary","Messenger Bug Jar":"legendary","Sage's Golden Mask":"legendary",
-  "Dragonblood Essence":"legendary",
+  "Dragonblood Essence":"legendary","Stardust Bloom":"legendary",
 
   "Wolfrunner's Armband":"holy","Retribution Spearhead":"holy","Lost Pontiff's Crown":"holy",
-  "Kjernno's Idol":"holy","Gem of the Gods":"holy","Immaculate Egg":"holy","Abyssal Dragon Egg":"holy",
-  "Faded Divine Tree Heart":"holy","Vronn's Forging Hammer":"holy","Golden Anchor Chain":"holy","Blazing Sun Chariot":"holy",
+  "Kjernnos Idol":"holy","Gem of the Gods":"holy","Immaculate Egg":"holy","Abyssal Dragon Egg":"holy",
+  "Faded Divine Tree Heart":"holy","Vronn's Forging Hammer":"holy","Golden Anchor Chain":"holy",
+  "Blazing Sun Chariot":"holy",
 
   "Gyldenblod":"currency"
 };
@@ -238,107 +238,110 @@ function rarityClass(name) {
   return "r-" + (RARITY[name] || "tba");
 }
 
+// ========== Complete Camp Data ==========
 const DATA = {
-  "Gyldenblod Pool (9 levels)": {
-    levels: [
-      { lvl:2, bonus:"Gyldjar +0 → +50%", mats:{ "Incense Burner":2, "Velgr Feather":2, "Lynx Whiskers":3, "Tarred Rope":3 } },
-      { lvl:3, bonus:"Gyldjar +50 → +100%  |  Character slots +1", mats:{ "Dragonslayer's Banner":1, "Spirit Antler":2, "Veteran Medal":2, "Heavy Stone Block":1 } },
-      { lvl:4, bonus:"Gyldjar +100 → +150%  |  Character slots +2  |  Spirit Infusion", mats:{ "Penitent's Tear":1, "Slumbering Dragon Statue":1, "Pearl Dust":1, "Lazurite":2 } },
-      { lvl:5, bonus:"Gyldjar +150 → +200%  |  Character slots +3", mats:{ "Velvar's Teachings":1, "Obsidian Raven":1, "Holy Sith Astrolabe":1, "Soulcomb Net":2 } },
-      { lvl:6, bonus:"Gyldjar +200 → +300%  |  Character slots +4", mats:{ "Abyssal Dragon Egg":1, "Messenger Bug Jar":1, "Ritual Severed Dagger":2 } },
-      { lvl:7, bonus:"Gyldjar +300 → +400%  |  Character slots +5  (Fate: Warning)", mats:{}, tba:true },
-      { lvl:8, bonus:"Gyldjar +400 → +500%  |  Character slots +6  (Fate: Warning)", mats:{ "Gyldenblod":1500, "Retribution Spearhead":1, "Lost Pontiff's Crown":1, "Wolfrunner's Armband":1, "Fire Salamander Fossil":2 } },
-      { lvl:9, bonus:"Gyldjar +500 → +700%  |  Character slots +7  |  cheaper Spirit Infusion", mats:{}, tba:true }
-    ]
-  },
   "Warehouse (13 levels)": {
     levels: [
-      { lvl:2, bonus:"Capacity +0 → +24", mats:{ "Pearl Dust":1, "Copper Button":2, "Fine Salt":2, "Fishbone":2 } },
-      { lvl:3, bonus:"Capacity +24 → +48", mats:{ "Dragonslayer's Banner":1, "Norgard King's Coin":1, "Fortune Bean":2, "Spiritwood Pin":2 } },
-      { lvl:4, bonus:"Capacity +48 → +72", mats:{ "Soul Jar":1, "Ornamental Orb":1, "Slumbering Dragon Statue":1, "Silver Bowl":2 } },
-      { lvl:5, bonus:"Capacity +72 → +104", mats:{ "Hastain's Tear":1, "Frostbee Crystal Hive":1, "Gem Mirror":2, "Hallowgrove Codex":2 } },
-      { lvl:6, bonus:"Capacity +104 → +136", mats:{ "Kjernno's Idol":1, "Velvar's Teachings":1, "Blessing Sachet":2 } },
-      { lvl:7, bonus:"Capacity +136 → +168", mats:{}, tba:true },
-      { lvl:8, bonus:"Capacity +168 → +208", mats:{}, tba:true },
-      { lvl:9, bonus:"Capacity +208 → +248", mats:{}, tba:true },
-      { lvl:10, bonus:"Capacity +248 → +288", mats:{}, tba:true },
-      { lvl:11, bonus:"Capacity +288 → +336", mats:{}, tba:true },
-      { lvl:12, bonus:"Capacity +336 → +392", mats:{}, tba:true },
-      { lvl:13, bonus:"Capacity +392 → +448", mats:{}, tba:true }
+      { lvl:2, bonus:"Capacity +0 → +24", mats:{ "Gyldenblod":150, "Pearl Dust":1, "Copper Button":2, "Fine Salt":2, "Fishbone":2 } },
+      { lvl:3, bonus:"Capacity +24 → +48", mats:{ "Gyldenblod":300, "Dragonslayer's Banner":1, "Norgard King's Coin":1, "Fortune Bean":2, "Spiritwood Pin":2 } },
+      { lvl:4, bonus:"Capacity +48 → +72", mats:{ "Gyldenblod":450, "Soul Jar":1, "Ornamental Orb":1, "Slumbering Dragon Statue":1, "Silver Bowl":2 } },
+      { lvl:5, bonus:"Capacity +72 → +104", mats:{ "Gyldenblod":600, "Hastain's Tear":1, "Frostbee Crystal Hive":1, "Gem Mirror":2, "Hallowgrove Codex":2 } },
+      { lvl:6, bonus:"Capacity +104 → +136", mats:{ "Gyldenblod":1000, "Kjernnos Idol":1, "Velvar's Teachings":1, "Blessing Sachet":1, "Pathfinder Lantern":2 } },
+      { lvl:7, bonus:"Capacity +136 → +168", mats:{ "Gyldenblod":2000, "Sage's Golden Mask":1, "Gold Ship Sculpture":1, "Obsidian Raven":1, "Obsidian Ore":2 } },
+      { lvl:8, bonus:"Capacity +168 → +208", mats:{ "Gyldenblod":4000, "Abyssal Dragon Egg":1, "Retribution Spearhead":1, "Gilded Ring":2, "Spellbound Doll":2 } },
+      { lvl:9, bonus:"Capacity +208 → +248", mats:{ "Gyldenblod":6000, "Blazing Sun Chariot":1, "Immaculate Egg":1, "Dragonblood Essence":1, "Lost Pontiff's Crown":1 } },
+      { lvl:10, bonus:"Capacity +248 → +288", mats:{ "Gyldenblod":8000, "Stardust Bloom":1, "Retribution Spearhead":1, "Vronn's Forging Hammer":1, "Kjernnos Idol":1 } },
+      { lvl:11, bonus:"Capacity +288 → +336", mats:{ "Gyldenblod":10000, "Gem of the Gods":1, "Immaculate Egg":1, "Wolfrunner's Armband":1, "Golden Anchor Chain":1 } },
+      { lvl:12, bonus:"Capacity +336 → +392", mats:{ "Gyldenblod":10000, "Gem of the Gods":1, "Abyssal Dragon Egg":1, "Blazing Sun Chariot":1, "Lost Pontiff's Crown":1 } },
+      { lvl:13, bonus:"Capacity +392 → +448", mats:{ "Gyldenblod":10000, "Gem of the Gods":1, "Faded Divine Tree Heart":1, "Sage's Golden Mask":1, "Dragonblood Essence":1 } }
     ]
   },
   "Goddess Statue (8 levels)": {
     levels: [
-      { lvl:2, bonus:"Springhorn Healing +0% → +10%", mats:{ "Pearl Dust":1, "Velgr Feather":1, "Heavy Stone Block":2, "Vine Bundle":1 } },
-      { lvl:3, bonus:"+10% → +20%", mats:{ "Gem Mirror":1, "Spirit Antler":2, "Exotic Seed":3, "Mutant Mycelium":2 } },
-      { lvl:4, bonus:"+20% → +30%", mats:{ "Holy Sith Astrolabe":1, "Norgard King's Coin":1, "Crimson Bat Eye":1, "Lazurite":2 } },
-      { lvl:5, bonus:"+30% → +40%", mats:{ "Frostbee Crystal Hive":1, "Soul Jar":1, "Spellbound Doll":1, "Obsidian Ore":2 } },
-      { lvl:6, bonus:"+40% → +50%", mats:{"Kjernno's Idol": 1, "Celestigold": 1, "Dragonflame Bone": 2, "Pathfinder Lantern": 1} },
+      { lvl:2, bonus:"Springhorn Healing +0% → +10%", mats:{ "Gyldenblod":50, "Pearl Dust":1, "Velgr Feather":1, "Heavy Stone Block":2, "Vine Bundle":1 } },
+      { lvl:3, bonus:"+10% → +20%", mats:{ "Gyldenblod":150, "Gem Mirror":1, "Spirit Antler":2, "Exotic Seed":3, "Mutant Mycelium":2 } },
+      { lvl:4, bonus:"+20% → +30%", mats:{ "Gyldenblod":300, "Holy Sith Astrolabe":1, "Norgard King's Coin":1, "Crimson Bat Eye":1, "Lazurite":2 } },
+      { lvl:5, bonus:"+30% → +40%", mats:{ "Gyldenblod":450, "Frostbee Crystal Hive":1, "Soul Jar":1, "Spellbound Doll":1, "Obsidian Ore":2 } },
+      { lvl:6, bonus:"+40% → +50%", mats:{ "Gyldenblod":700, "Kjernnos Idol":1, "Celestigold":1, "Dragonflame Bone":2, "Pathfinder Lantern":1 } },
       { lvl:7, bonus:"+50% → +55%  (Fate: Warning)", mats:{ "Gyldenblod":1000, "Retribution Spearhead":1, "Lost Pontiff's Crown":1, "Gold Ship Sculpture":1, "Slumbering Dragon Statue":2 } },
-      { lvl:8, bonus:"+55% → +60%  (Fate: Warning)", mats:{}, tba:true }
+      { lvl:8, bonus:"+55% → +60%  (Fate: Warning)", mats:{ "Gyldenblod":1500, "Gem of the Gods":1, "Penitent's Tear":1, "Soulcomb Net":1 } }
+    ]
+  },
+  "Gyldenblod Pool (9 levels)": {
+    levels: [
+      { lvl:2, bonus:"Gyldjar +0 → +50%", mats:{ "Gyldenblod":100, "Incense Burner":2, "Velgr Feather":2, "Lynx Whiskers":3, "Tarred Rope":3 } },
+      { lvl:3, bonus:"Gyldjar +50 → +100%  |  Character slots +1", mats:{ "Gyldenblod":200, "Dragonslayer's Banner":1, "Spirit Antler":2, "Veteran Medal":2, "Heavy Stone Block":1 } },
+      { lvl:4, bonus:"Gyldjar +100 → +150%  |  Character slots +2  |  Spirit Infusion", mats:{ "Gyldenblod":300, "Penitent's Tear":1, "Slumbering Dragon Statue":1, "Pearl Dust":1, "Lazurite":2 } },
+      { lvl:5, bonus:"Gyldjar +150 → +200%  |  Character slots +3", mats:{ "Gyldenblod":400, "Velvar's Teachings":1, "Obsidian Raven":1, "Holy Sith Astrolabe":1, "Soulcomb Net":2 } },
+      { lvl:6, bonus:"Gyldjar +200 → +300%  |  Character slots +4", mats:{ "Gyldenblod":600, "Abyssal Dragon Egg":1, "Messenger Bug Jar":1, "Ritual Severed Dagger":2 } },
+      { lvl:7, bonus:"Gyldjar +300 → +400%  |  Character slots +5  (Fate: Warning)", mats:{ "Gyldenblod":1000, "Golden Anchor Chain":1, "Vronn's Forging Hammer":1, "Penitent's Tear":1 } },
+      { lvl:8, bonus:"Gyldjar +400 → +500%  |  Character slots +6  (Fate: Warning)", mats:{ "Gyldenblod":1500, "Retribution Spearhead":1, "Lost Pontiff's Crown":1, "Wolfrunner's Armband":1, "Fire Salamander Fossil":2 } },
+      { lvl:9, bonus:"Gyldjar +500 → +700%  |  Character slots +7  |  cheaper Spirit Infusion  (Fate: Warning)", mats:{ "Gyldenblod":2000, "Kjernnos Idol":1, "Golden Anchor Chain":1, "Immaculate Egg":1, "Blazing Sun Chariot":1 } }
     ]
   },
   "Workshop (8 levels)": {
     levels: [
-      { lvl:2, bonus:"Excellent weapons/accessories + faster Excellent & T1 Gems", mats:{ "Soulcall Flute":1, "Copper Button":2, "Charcoal":2 } },
-      { lvl:3, bonus:"Epic armor + queue expand", mats:{ "Mithril Lamp":1, "Mixed Spices":1, "Slime":1, "Mutant Mycelium":2 } },
-      { lvl:4, bonus:"Epic weapons/accessories + faster Epic", mats:{ "Blessing Sachet":1, "Gem Mirror":1, "Blood Moss":1 } },
-      { lvl:5, bonus:"Tier 2 Gems", mats:{ "Gilded Ring":1, "Hastain's Tear":1, "Ritual Severed Dagger":1, "Mythic Panel":2 } },
-      { lvl:6, bonus:"Legendary armor + faster T2 Gems", mats:{"Wolfrunner's Armband":1, "Blessing Sachet":1, "Ornamental Orb":1} },
-      { lvl:7, bonus:"Legendary weapons/accessories", mats:{}, tba:true },
-      { lvl:8, bonus:"Holy weapons", mats:{}, tba:true }
-    ]
-  },
-  "Shop (6 levels)": {
-    levels: [
-      { lvl:2, bonus:"Premium Shop", mats:{ "Velgr Feather":1, "Slime":1, "Vine Bundle":2, "Fishbone":2 } },
-      { lvl:3, bonus:"More Premium stock", mats:{ "Gem Mirror":1, "Pearl Dust":2, "Needle Case":2, "Herb Bundle":2 } },
-      { lvl:4, bonus:"New Tactical items", mats:{ "Bloodstained Brooch":2, "Thunder Ore":2, "Fine Salt":2, "Ornate Wooden Box":2 } },
-      { lvl:5, bonus:"Chance of Excellent stock", mats:{ "Velvar's Teachings":1, "Dragonslayer's Banner":1, "Mithril Lamp":1, "Soulcall Flute":2 } },
-      { lvl:6, bonus:"Further stock", mats:{"Gilded Ring": 1, "Celestigold":1, "Slumbering Dragon Statue":1, "Mixed Spices":2 }, }
-    ]
-  },
-  "Auction House (6 levels)": {
-    levels: [
-      { lvl:2, bonus:"+1 Auction slot", mats:{ "Gem Mirror":1, "Mixed Spices":2, "Soulcall Flute":2, "Glintstone":2 } },
-      { lvl:3, bonus:"+4 total slots", mats:{ "Norgard King's Coin":2, "Mithril Lamp":2, "Bone Lyre":2, "Blood Moss":2 } },
-      { lvl:4, bonus:"+6 total slots", mats:{ "Spellbound Doll":1, "Blessing Sachet":1, "Dragonslayer's Banner":1, "Thunder Ore":1 } },
-      { lvl:5, bonus:"+9 total slots", mats:{ "Golden Anchor Chain":1, "Ornamental Orb":1, "Dragonflame Bone":2, "Fortune Bean":2 } },
-      { lvl:6, bonus:"+12 total slots", mats:{ "Dragonblood Essence":1, "Messenger Bug Jar":1, "Hallowgrove Codex":2, "Incense Burner":2 } }
-    ]
-  },
-  "Tavern (4 levels)": {
-    levels: [
-      { lvl:2, bonus:"Hero’s Ale", mats:{ "Norgard King's Coin":2, "Ritual Severed Dagger":2, "Crimson Bat Eye":2, "Bone Lyre":1 } },
-      { lvl:3, bonus:"Warblood", mats:{ "Gold Ship Sculpture":1, "Dragonslayer's Banner":1, "Incense Burner":2, "Veteran Medal":2 } },
-      { lvl:4, bonus:"Gods’ Brew", mats:{ "Blazing Sun Chariot":1, "Ornamental Orb":2, "Mythic Panel":2, "Silver Bowl":2 } }
+      { lvl:2, bonus:"Excellent weapons/accessories + faster Excellent & T1 Gems", mats:{ "Gyldenblod":50, "Soulcall Flute":1, "Copper Button":2, "Charcoal":2 } },
+      { lvl:3, bonus:"Epic armor + queue expand", mats:{ "Gyldenblod":150, "Mithril Lamp":1, "Mixed Spices":1, "Slime":1, "Mutant Mycelium":2 } },
+      { lvl:4, bonus:"Epic weapons/accessories + faster Epic", mats:{ "Gyldenblod":300, "Blessing Sachet":1, "Gem Mirror":1, "Blood Moss":1 } },
+      { lvl:5, bonus:"Tier 2 Gems", mats:{ "Gyldenblod":450, "Gilded Ring":1, "Hastain's Tear":1, "Ritual Severed Dagger":1, "Mythic Panel":2 } },
+      { lvl:6, bonus:"Legendary armor + faster T2 Gems + queue", mats:{ "Gyldenblod":700, "Wolfrunner's Armband":1, "Blessing Sachet":1, "Ornamental Orb":1 } },
+      { lvl:7, bonus:"Legendary weapons/accessories", mats:{ "Gyldenblod":1000, "Immaculate Egg":1, "Frostbee Crystal Hive":1, "Soulcomb Net":2 } },
+      { lvl:8, bonus:"Holy weapons", mats:{ "Gyldenblod":1500, "Abyssal Dragon Egg":1, "Wolfrunner's Armband":1, "Holy Sith Astrolabe":1, "Mithril Lamp":2 } }
     ]
   },
   "Scavenger Squad (8 levels)": {
     levels: [
-      { lvl:2, bonus:"New strategies – Normal Zone", mats:{ "Bone Lyre":1, "Needle Case":1, "Charcoal":2 } },
-      { lvl:3, bonus:"Anomaly Zone", mats:{ "Dragonflame Bone":1, "Fortune Bean":2, "Slime":2, "Ornate Wooden Box":2 } },
-      { lvl:4, bonus:"New strategies – Anomaly", mats:{ "Soul Jar":1, "Hallowgrove Codex":1, "Silver Bowl":1, "Glintstone":2 } },
-      { lvl:5, bonus:"Danger Zone", mats:{ "Obsidian Raven":1, "Hastain's Tear":1, "Pathfinder Lantern":2 } },
-      { lvl:6, bonus:"New strategies – Danger", mats:{ "Sage's Golden Mask":1, "Holy Sith Astrolabe":1, "Bloodstained Brooch":2 } },
-      { lvl:7, bonus:"Cataclysm Zone", mats:{}, tba:true },
-      { lvl:8, bonus:"Final strategies", mats:{}, tba:true }
+      { lvl:1, bonus:"Unlocks Scavenger Squad", mats:{ "Gyldenblod":50, "Soulcall Flute":1, "Copper Button":2, "Charcoal":4 } },
+      { lvl:2, bonus:"New strategies – Normal Zone", mats:{ "Gyldenblod":100, "Bone Lyre":1, "Needle Case":1, "Charcoal":2 } },
+      { lvl:3, bonus:"Anomaly Zone", mats:{ "Gyldenblod":300, "Dragonflame Bone":1, "Fortune Bean":2, "Slime":2, "Ornate Wooden Box":2 } },
+      { lvl:4, bonus:"New strategies – Anomaly", mats:{ "Gyldenblod":500, "Soul Jar":1, "Hallowgrove Codex":1, "Silver Bowl":1, "Glintstone":2 } },
+      { lvl:5, bonus:"Danger Zone", mats:{ "Gyldenblod":800, "Obsidian Raven":1, "Hastain's Tear":1, "Pathfinder Lantern":2 } },
+      { lvl:6, bonus:"New strategies – Danger", mats:{ "Gyldenblod":1200, "Sage's Golden Mask":1, "Holy Sith Astrolabe":1, "Bloodstained Brooch":2 } },
+      { lvl:7, bonus:"Cataclysm Zone  (Fate: Warning)", mats:{ "Gyldenblod":1500, "Dragonblood Essence":1, "Penitent's Tear":2, "Fire Salamander Fossil":1 } },
+      { lvl:8, bonus:"New strategies – Cataclysm  (Fate: Warning)", mats:{ "Gyldenblod":2000, "Faded Divine Tree Heart":1, "Vronn's Forging Hammer":1, "Velvar's Teachings":1 } }
+    ]
+  },
+  "Shop (6 levels)": {
+    levels: [
+      { lvl:2, bonus:"Premium Shop", mats:{ "Gyldenblod":50, "Velgr Feather":1, "Slime":1, "Vine Bundle":2, "Fishbone":2 } },
+      { lvl:3, bonus:"More Premium stock", mats:{ "Gyldenblod":100, "Gem Mirror":1, "Pearl Dust":2, "Needle Case":2, "Herb Bundle":2 } },
+      { lvl:4, bonus:"New Tactical items", mats:{ "Gyldenblod":150, "Bloodstained Brooch":2, "Thunder Ore":2, "Fine Salt":2, "Ornate Wooden Box":2 } },
+      { lvl:5, bonus:"Chance of Excellent stock", mats:{ "Gyldenblod":200, "Velvar's Teachings":1, "Dragonslayer's Banner":1, "Mithril Lamp":1, "Soulcall Flute":2 } },
+      { lvl:6, bonus:"Further Tactical items", mats:{ "Gyldenblod":300, "Celestigold":1, "Gilded Ring":1, "Slumbering Dragon Statue":1, "Mixed Spices":2 } }
+    ]
+  },
+  "Auction House (6 levels)": {
+    levels: [
+      { lvl:2, bonus:"Auction slots +0 → +2", mats:{ "Gyldenblod":150, "Gem Mirror":1, "Mixed Spices":2, "Soulcall Flute":2, "Glintstone":2 } },
+      { lvl:3, bonus:"Auction slots +2 → +4", mats:{ "Gyldenblod":300, "Norgard King's Coin":2, "Mithril Lamp":2, "Bone Lyre":2, "Blood Moss":2 } },
+      { lvl:4, bonus:"Auction slots +4 → +6", mats:{ "Gyldenblod":450, "Spellbound Doll":1, "Blessing Sachet":1, "Dragonslayer's Banner":1, "Thunder Ore":1 } },
+      { lvl:5, bonus:"Auction slots +6 → +9", mats:{ "Gyldenblod":600, "Golden Anchor Chain":1, "Ornamental Orb":1, "Dragonflame Bone":2, "Fortune Bean":2 } },
+      { lvl:6, bonus:"Auction slots +9 → +12", mats:{ "Gyldenblod":800, "Dragonblood Essence":1, "Messenger Bug Jar":1, "Hallowgrove Codex":2, "Incense Burner":2 } }
+    ]
+  },
+  "Tavern (4 levels)": {
+    levels: [
+      { lvl:2, bonus:"Hero’s Ale", mats:{ "Gyldenblod":150, "Norgard King's Coin":2, "Ritual Severed Dagger":2, "Crimson Bat Eye":2, "Bone Lyre":1 } },
+      { lvl:3, bonus:"Warblood", mats:{ "Gyldenblod":300, "Gold Ship Sculpture":1, "Dragonslayer's Banner":1, "Incense Burner":2, "Veteran Medal":2 } },
+      { lvl:4, bonus:"Gods’ Brew", mats:{ "Gyldenblod":500, "Blazing Sun Chariot":1, "Ornamental Orb":2, "Mythic Panel":2, "Silver Bowl":2 } }
     ]
   },
   "Soulcatch Tree (8 levels)": {
     levels: [
-      { lvl:2, bonus:"Net slots +2  |  Queue +1", mats:{ "Blood Moss":1, "Spiritwood Pin":1, "Pottery Shard":3 } },
-      { lvl:3, bonus:"Net +4  |  Queue +2", mats:{ "Bloodstained Brooch":1, "Crimson Bat Eye":1, "Needle Case":2, "Herb Bundle":2 } },
-      { lvl:4, bonus:"Net +6  |  Queue +3", mats:{ "Obsidian Ore":2, "Mithril Lamp": 1, "Thunder Ore": 1 } },
-      { lvl:5, bonus:"Further slots", mats:{"Gold Ship Sculpture":1, "Fire Salamander Fossil" :1, "Ritual Severed Dagger": 1, "Crimson Bat Eye": 1}, },
-      { lvl:6, bonus:"Further slots", mats:{"Wolfrunner's Armband":1, "Obsidian Raven": 1, "Dragonslayer's Banner": 1 }, },
-      { lvl:7, bonus:"Further slots", mats:{}, tba:true },
-      { lvl:8, bonus:"Max (Net ~20 / Queue ~10)", mats:{}, tba:true }
+      { lvl:1, bonus:"Net slots: 6  |  Queue: 3", mats:{ "Gyldenblod":50, "Crimson Bat Eye":1, "Velgr Feather":1, "Pottery Shard":3 } },
+      { lvl:2, bonus:"Net +0 → +2  |  Queue +0 → +1", mats:{ "Gyldenblod":300, "Blood Moss":1, "Spiritwood Pin":1, "Pottery Shard":3 } },
+      { lvl:3, bonus:"Net +2 → +4  |  Queue +1 → +2", mats:{ "Gyldenblod":1000, "Bloodstained Brooch":1, "Crimson Bat Eye":1, "Needle Case":2, "Herb Bundle":2 } },
+      { lvl:4, bonus:"Net +4 → +6  |  Queue +2 → +3", mats:{ "Gyldenblod":2000, "Obsidian Ore":2, "Mithril Lamp":1, "Thunder Ore":1 } },
+      { lvl:5, bonus:"Net +6 → +8  |  Queue +3 → +4", mats:{ "Gyldenblod":3000, "Gold Ship Sculpture":1, "Fire Salamander Fossil":1, "Ritual Severed Dagger":1, "Crimson Bat Eye":1 } },
+      { lvl:6, bonus:"Net +8 → +10  |  Queue +4 → +5  (Fate: Warning)", mats:{ "Gyldenblod":5000, "Wolfrunner's Armband":1, "Obsidian Raven":1, "Dragonslayer's Banner":1 } },
+      { lvl:7, bonus:"Net +10 → +12  |  Queue +5 → +6  (Fate: Warning)", mats:{ "Gyldenblod":7000, "Sage's Golden Mask":1, "Frostbee Crystal Hive":1, "Hastain's Tear":1 } },
+      { lvl:8, bonus:"Net +12 → +14  |  Queue +6 → +7  (Fate: Warning)", mats:{ "Gyldenblod":10000, "Stardust Bloom":1, "Vronn's Forging Hammer":1, "Soul Jar":1 } }
     ]
   }
 };
 
-const STORAGE_KEY = "mistfall_camp_color_cascade_v1";
+const STORAGE_KEY = "mistfall_camp_full_v3";
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
 
 function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -362,7 +365,7 @@ function renderTotals() {
   const el = document.getElementById("item-list");
   const entries = Object.entries(needed).sort((a,b) => a[0].localeCompare(b[0]));
   if (entries.length === 0) {
-    el.innerHTML = "<div style='color:var(--done)'>All tracked upgrades complete!</div>";
+    el.innerHTML = "<div style='color:var(--done)'>All upgrades complete! 🎉</div>";
     return;
   }
   el.innerHTML = entries.map(([item, qty]) =>
@@ -374,13 +377,13 @@ function render() {
   const container = document.getElementById("buildings");
   container.innerHTML = "";
   for (const [bName, b] of Object.entries(DATA)) {
-    const allDone = b.levels.every(lv => state[`${bName}|${lv.lvl}`] || lv.tba);
+    const allDone = b.levels.every(lv => state[`${bName}|${lv.lvl}`]);
     const div = document.createElement("div");
     div.className = "building";
     div.innerHTML = `
       <div class="building-header">
         <h3>${bName}</h3>
-        <span class="badge ${allDone ? "done" : ""}">${allDone ? "Done / TBA only" : b.levels.length + " levels"}</span>
+        <span class="badge ${allDone ? "done" : ""}">${allDone ? "Done" : b.levels.length + " levels"}</span>
       </div>
       <div class="levels"></div>
     `;
@@ -391,14 +394,9 @@ function render() {
       const row = document.createElement("div");
       row.className = "level" + (done ? " completed" : "");
 
-      let matsHtml = "";
-      if (lv.tba || Object.keys(lv.mats || {}).length === 0) {
-        matsHtml = `<span class="mat-chip r-tba">Materials TBA — check in-game</span>`;
-      } else {
-        matsHtml = Object.entries(lv.mats).map(([name, qty]) =>
-          `<span class="mat-chip ${rarityClass(name)}">${qty}× ${name}</span>`
-        ).join("");
-      }
+      const matsHtml = Object.entries(lv.mats || {}).map(([name, qty]) =>
+        `<span class="mat-chip ${rarityClass(name)}">${qty}× ${name}</span>`
+      ).join("");
 
       row.innerHTML = `
         <input type="checkbox" ${done ? "checked" : ""}>
